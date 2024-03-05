@@ -129,7 +129,6 @@ class LoginRegisterApp:
             messagebox.showerror("Ошибка", "Пароль должен содержать минимум 8 символов!")
             return
 
-
         # Шифрование пароля с использованием ключа
         cipher_suite = Fernet(self.key)
         encrypted_password = cipher_suite.encrypt(password.encode())
@@ -153,8 +152,8 @@ class LoginRegisterApp:
         # Функция для открытия окна калькулятора
         calc_win = tk.Tk()
 
-        # Передача окна калькулятора в CalculatorApp
-        app = CalculatorApp(calc_win)
+        # Передача окна калькулятора в класс CalculatorApp
+        CalculatorApp(calc_win)
 
         # Переименовываем программу
         calc_win.title("Калькулятор")
@@ -170,7 +169,6 @@ class LoginRegisterApp:
         calc_win.mainloop()
 
 class CalculatorApp(tk.Frame):
-
     def __init__(self, calc_win):
         super().__init__(calc_win)
         self.calc_win = calc_win
@@ -225,6 +223,12 @@ class CalculatorApp(tk.Frame):
         self.calc.bind('9', self.add_keyboard_digit)
         self.calc.bind('0', self.add_keyboard_digit)
 
+        # Чтобы при вводе операторов старый оператор удалялся как на графическом интерфейсе это сделано
+        self.calc.bind('-', self.add_keyboard_operation)
+        self.calc.bind('+', self.add_keyboard_operation)
+        self.calc.bind('/', self.add_keyboard_operation)
+        self.calc.bind('*', self.add_keyboard_operation)
+
         # Чтобы при нажатии на клавиатуре клавишы С поле ввода очищалось
         self.calc_win.bind('c', lambda event: self.clear())
         self.calc_win.bind('C', lambda event: self.clear())
@@ -242,16 +246,13 @@ class CalculatorApp(tk.Frame):
         self.calc_win.grid_rowconfigure(3, minsize=60)
         self.calc_win.grid_rowconfigure(4, minsize=60)
 
-
     def make_digit_button(self, digit):
         return tk.Button(self.calc_win, text=digit, bd=5, font=('Arial', 10), command=lambda: self.add_digit(digit))
 
     def add_digit(self, digit):
-
         value = self.calc.get()
-
-        # Если первый символ - '0' и длина строки равна 1, удаляем '0' и добавляем новую цифру
-        if value[0] == '0' and len(value) == 1:
+        # При вводе первых цифр то цифра 0 по умолчанию удаляется и приписывается новая цифра введена из интерфейса
+        if value[-1] == '0' and len(value) == 1:
             value = value[1:]
 
         # Очистка поля ввода и добавление новой цифры
@@ -260,19 +261,32 @@ class CalculatorApp(tk.Frame):
 
     def add_keyboard_digit(self, event):
         value = self.calc.get()
-        if value[0] == '0' and len(value) == 1:
+        # При вводе первых цифр то цифра 0 по умолчанию удаляется и приписывается новая цифра введена из клавиатуры
+        if value[-1] == '0' and len(value) == 1:
             self.calc.delete(0, tk.END)
 
     def make_operation_button(self, operation):
-        return tk.Button(self.calc_win, text=operation, bd=5, font=('Arial', 13), fg='#11d911', bg='#D3D3D3',command=lambda: self.add_operation(operation))
+        return tk.Button(self.calc_win, text=operation, bd=5, font=('Arial', 13), fg='#11d911', bg='#D3D3D3', command=lambda: self.add_operation(operation))
 
     def add_operation(self, operation):
         value = self.calc.get()
-
+        # Если пользователь нажмёт повторно на оператор. То предедущий оператор поменяется на новый который он поставил
         if value[-1] in '+-/*':
             value = value[:-1]
+        # Очищаем все поле
         self.calc.delete(0, tk.END)
+        # Приписываем число которое мы удалили и приписываем оператор который он недавно выбрал из '+-/*'
         self.calc.insert(0, value + operation)
+
+    def add_keyboard_operation(self, value):
+        value = self.calc.get()
+        # Если пользователь введет повторно оператор. То предедущий оператор поменяется на новый который он написал на клавиатуре
+        if value[-1] in '+-/*':
+            value = value[:-1]
+        # Очищаем все поле
+        self.calc.delete(0, tk.END)
+        # Приписываем число которое мы удалили и приписываем оператор который он недавно выбрал из клавиатуры '+-/*'
+        self.calc.insert(0, value)
 
     def make_clear_button(self, operation):
         return tk.Button(self.calc_win, text=operation, bd=5, font=('Arial', 13), fg='#fb2c03', bg='#939393', command=self.clear)
@@ -287,6 +301,8 @@ class CalculatorApp(tk.Frame):
     def calculate(self):
         # Принимаем значения в вводе
         value = self.calc.get()
+        # Удаление всех символов, кроме "+-*/." и цифр
+        value = re.sub(r"[^\d+\-*/.]", "", value)
         # Удаляем все пробелы из строки. Тут метод .strip() не подходит потому что удаляет только начальные и конечные пробелы в строке, но не удаляет пробелы внутри строки.
         value = value.replace(' ', '')
 
@@ -301,22 +317,19 @@ class CalculatorApp(tk.Frame):
                 messagebox.showerror("Ошибка", "Деление на ноль!")
                 return
 
-        # Проверяем, состоит ли строка только из цифр или разрешенных специальных знаков
-        if all(char.isdigit() or char in '+-*/.' for char in value):
-            # Очищаем поле ввода
-            self.calc.delete(0, tk.END)
-            # Высчитываем и выводим результат || функция eval считывает даже str строку
-            self.calc.insert(0, eval(value))
-        else:
-            # Показываем сообщение об ошибке
-            messagebox.showerror("Ошибка", "Неверное выражение!")
-            # Выходим из функции
-            return
+        # Очищаем поле ввода
+        self.calc.delete(0, tk.END)
+        # Высчитываем и выводим результат || функция eval считывает даже str строку
+        self.calc.insert(0, eval(value))
 
 def open_login_register():
     # Функция для открытия окна входа/регистрации
     login_register_window = tk.Tk()
-    app = LoginRegisterApp(login_register_window)
+    # Запрещаем менять размер окна входа/регистрации
+    login_register_window.resizable(width=False, height=False)
+    # Передача окна регистрации в класс LoginRegisterApp
+    LoginRegisterApp(login_register_window)
+    # Режим ожидания
     login_register_window.mainloop()
 
 if __name__ == "__main__":
