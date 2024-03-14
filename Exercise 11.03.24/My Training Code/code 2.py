@@ -1,13 +1,15 @@
 import sqlite3
 import bcrypt
 
-# Подключение к базе данных (или создание, если она не существует)
-conn = sqlite3.connect('users.db')
-cursor = conn.cursor()
+# Coединение с базой данных будет автоматически закрыто после завершения блока кода.
+with sqlite3.connect('users.db') as conn:
+    # После создания курсора вы можете вызывать методы для выполнения запросов к базе данных, такие как execute(), fetchone(), fetchall() и другие, используя этот курсор.
+    cursor = conn.cursor()
 
-# Создание таблицы пользователей, если она еще не существует
-cursor.execute('''CREATE TABLE IF NOT EXISTS users
-               (login TEXT PRIMARY KEY, password TEXT, password_hash TEXT, gmail TEXT, admin TEXT)''')
+    # Создание таблицы пользователей, если она еще не существует
+    cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                   (login TEXT PRIMARY KEY, password TEXT, password_hash TEXT, gmail TEXT, admin TEXT)''')
+
 
 
 def hash_password(password):
@@ -67,10 +69,7 @@ def login():
     # Получаем хэш пароля и статус администратора
     result = cursor.fetchone()
     if result and check_password(result[0], password):
-        if result[1] == 'True':
-            print("Вход выполнен успешно! Вы администратор.")
-        else:
-            print("Вход выполнен успешно! Вы не администратор.")
+        print(f"Вход выполнен успешно! Статус админа: {result[1]}")
     else:
         print("Неверный логин или пароль.")
 
