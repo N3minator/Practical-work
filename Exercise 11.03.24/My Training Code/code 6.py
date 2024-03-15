@@ -147,8 +147,7 @@ def buy_book(conn, cursor, login, user_id):
         if is_book_available:
             cursor.execute("UPDATE books SET visible=0 WHERE id_books=?", (book_id,))
             date_rented = datetime.now().strftime("%d/%m/%Y")
-            return_date = (datetime.now() + timedelta(days=7)).strftime(
-                "%d/%m/%Y")  # Добавляем 7 дней к дате взятия книги на прокат
+            return_date = (datetime.now() + timedelta(days=7)).strftime("%d/%m/%Y")  # Добавляем 7 дней к дате взятия книги на прокат
 
             cursor.execute(
                 "INSERT INTO user_books (id_users, login, id_books, date_rented, return_date) VALUES (?, ?, ?, ?, ?)",
