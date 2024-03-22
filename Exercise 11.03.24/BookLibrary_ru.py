@@ -1,18 +1,3 @@
-# Простое Графическое Приложение
-import tkinter as tk
-# Для вывода сообщений на экран
-from tkinter import messagebox
-# Для работы с базами данных
-import sqlite3
-# Обработчик текста
-import re
-# Для хэширования важных данных
-import bcrypt
-# Для генерации случайных цифр
-import random
-
-# pip install bcrypt
-
 # Задание на Python
 #
 # Все книги должны храниться в базе данных MySQL.
@@ -60,6 +45,21 @@ import random
 # 7. Управление статусом библиотеки:
 #
 # Администраторы могут управлять состоянием библиотеки, добавляя новые книги, обновляя сведения о существующих книгах, удаляя книги и т. д.
+
+"Простое Графическое Приложение"
+import tkinter as tk
+# Для вывода сообщений на экран
+from tkinter import messagebox
+# Для работы с базами данных
+import sqlite3
+# Обработчик текста
+import re
+# Для хэширования важных данных
+import bcrypt
+# Для генерации случайных цифр
+import random
+
+
 
 class LoginRegisterApp:
 
@@ -306,6 +306,7 @@ def open_login_register():
     LoginRegisterApp(login_register_window)
     # Run in a loop
     login_register_window.mainloop()
+
 
 if __name__ == "__main__":
     open_login_register()
