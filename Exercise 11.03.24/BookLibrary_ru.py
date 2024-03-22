@@ -11,7 +11,7 @@ import bcrypt
 # Для генерации случайных цифр
 import random
 
-
+# Примечание: IDE PyCharm не знает о существовании self.cursor и self.execute. Из-а чего она выводит много предупреждений ибо она не может их распознать!
 
 class LoginRegisterApp:
 
